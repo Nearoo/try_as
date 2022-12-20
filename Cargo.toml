@@ -1,6 +1,15 @@
+[package]
+name = "try_as"
+version = "0.1.0"
+
 [workspace]
 resolver = "2"
 members = [
+    "traits",
     "macros",
     "tests"
 ]
+
+[dependencies]
+traits = { path="traits" }
+macros = { path="macros" }
