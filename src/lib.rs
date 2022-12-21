@@ -2,9 +2,9 @@
 //! enumerate a set of types.
 //!
 //! It exports a set of traits that help to this end:
-//! * [`traits::TryAsRef`]
-//! * [`traits::TryAsMut`]
-//! * [`traits::TypedContainer`]
+//! * [`traits::TryAsRef`] - like `AsRef<T>`, but allowed to fail
+//! * [`traits::TryAsMut`] - like `AsMut<T>`, but allowed to fail
+//! * [`traits::TypedContainer`] - inspect types of a container
 //!
 //! And a set of macros that derive implementations from these and some
 //! standard traits, namely:
@@ -121,4 +121,22 @@ pub use macros::*;
 pub mod traits {
     extern crate traits;
     pub use self::traits::*;
+}
+
+#[cfg(test)]
+mod test {
+    use traits::TryAsMut;
+
+    use super::*;
+    #[test]
+    fn test() {
+        #[derive(TryAsMut)]
+        enum Foo {
+            I32(i32),
+        }
+
+        let mut f = Foo::I32(0);
+        let x = f.try_as_mut_of::<i32>().unwrap();
+        *x = 2;
+    }
 }
