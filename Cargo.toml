@@ -5,8 +5,8 @@ version = "0.1.0"
 [workspace]
 resolver = "2"
 members = [
-    "traits",
     "macros",
+    "traits",
     "tests"
 ]
 

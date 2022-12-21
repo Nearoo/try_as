@@ -1,140 +1,154 @@
-# try_as crate
+Macros and traits to ease using "type-enumerating" enums.
 
 This crate defines traits that are useful when dealing with
 containers that can contain one of a finite set types.
 
 Further, it contains a set of macros that can automatically derive
-implementations for these traits for enums of a specific structure.
+implementations for these traits for enums of a specific structure,
+namely structs where:
+* Each variant has one single unnamed variant
+* Each argument types appears at most once
+
+For enums like this, this crate provides macros to easily convert between
+the enums, and values of the types in the enum.
+
+## Example
+
+A short example where all macros are used:
+We have an enum containing values of one of 3 types: `i64`, `String` and `bool`:
+```rust
+enum Value{
+    Number(i64),
+    String(String),
+    Bool(bool)
+}
+```
+
+And we want to convert between this enum and values of types `i64`, `String` and `bool`.
+Using the macros of this crate, this can be achieved easily:
+```rust
+# extern crate macros;
+# use macros as try_as;
+# use std::convert::TryInto;
+#[derive(try_as::From, try_as::TryInto, Debug)]
+enum Value{
+    Number(i64),
+    String(String),
+    Bool(bool)
+}
+
+// Convert to `Value` from `i64`, `String` or `bool` using `into`/`from`:
+let x = Value::from(0);
+let name = Value::from("Hello".to_owned());
+let yes_or_no: Value = false.into();
+
+// Convert back with `try_into`
+let maybe_i64: Result<i64, _> = x.try_into();
+assert_eq!(maybe_i64.unwrap(), 0);
+let maybe_i64: Result<i64, Value> = name.try_into();
+assert!(maybe_i64.is_err());
+
+```
+If we only need a reference to the value, we can use the macros `TryAsRef` and `TryAsMut`,
+which derive implementations for the new traits [`traits::TryAsRef`] and [`traits::TryAsMut`], respectively:
 
 
-The macros can derive traits `From`, `TryAsMut`, `TryAsRef`, `TryInto` and `TypedContainer`
-for enums of the following shape:
-* All variants must have exactly one unnamed field (e.g. `Foo(u32)`)
-* The type in a given variant must be unique to the enum
+```rust
+# mod try_as {
+#    pub extern crate traits;
+#    extern crate macros;
+#    pub use self::macros::*;
+# }
+use try_as::traits::{TryAsRef, TryAsMut};
 
- ### Ok:
+#[derive(try_as::TryAsRef, try_as::TryAsMut)]
+enum Value{
+    Number(i64),
+    String(String),
+    Bool(bool)
+}
 
- ```rust
- #[derive(TryInto)]
- enum Foo {
-     Bar(u32),
-     Baz(MyStruct)
-     Baf(Box<dyn MyTrait>)
-     Boo((u32, u32, f32))
- }
- ```
+let mut x = Value::Number(0);
 
- ### Not Ok:
- ```rust
- #[derive(TryInto)]
- enum Foo<T> {
-     Bar(T),
-     Baz { x: u32 },
-     Baf,
- }
+let x_ref: &i64 = x.try_as_ref().unwrap();
+assert_eq!(*x_ref, 0);
+
+let x_mut: &mut i64 = x.try_as_mut().unwrap();
+*x_mut = 4;
+
+let x_ref: &i64 = x.try_as_ref().unwrap();
+assert_eq!(*x_ref, 4);
+
+let str_ref: Option<&String> = x.try_as_ref();
+assert!(str_ref.is_none());
+```
+
+Finally, to inspect the type, we can use the trait `traits::TypedContainer`, which allows
+us to look at the [`std::any::TypeId`] of the contained type:
+```
+# mod try_as {
+#    pub extern crate traits;
+#    extern crate macros;
+#    pub use self::macros::*;
+# }
+use try_as::traits::TypedContainer;
+
+#[derive(try_as::TypedContainer)]
+enum Value{
+    Number(i64),
+    String(String),
+    Bool(bool)
+}
+
+let x = Value::Number(0);
+let boolean: Value = Value::Bool(false);
+assert!(x.holds::<i64>());
+assert!(!boolean.holds::<i64>());
+assert!(std::any::TypeId::of::<bool>() == boolean.type_id());
 
 ```
 
+## Todos and notes
 
- # Example
- When parsing data stemming from a more dynamically typed
- language, it might happen that certain values can be one of n types.
+In the doctests, the traits were very verbose to use, e.g. in the example
+``` rust
+#[derive(try_as::From, try_as::TryInto, Debug)]
+enum Value{
+    Number(i64),
+    String(String),
+    Bool(bool)
+}
 
- In this situation, it can be very useful to pass these values around
- as "one of" these types, yet still be able to modify the values
- as though they were specific types.
+let x = Value::from(0);
+// This doesn't work; rust can't resolve the type on its own
+assert_eq!(x.try_into().unwrap(), 0);
+// So etiher we write this
+assert_eq!((x as dyn TryInto<i64, _>).try_into().unwrap(), 0);
+// Or this
+let maybe_i64: Result<i64, _> = x.try_into();
+assert_eq!(maybe_i64.unwrap(), 0);
+```
 
- With this crate, this can conveniently be accomplished using macros.
+This problem might not come up that often in practice, to be determined.s
 
- In the following, we define a following type, applying all macros defined
- in this trait, and then show what each macro adds to that type:
+If it does, maybe we could define traits that allow specifying the
+return types in generic parameters of methods, and implement them for all
+types that implement the traits we already have, like this:
 
- ```rust
- use try_as::macros;
+```rust
+pub trait TryAs {
+    fn try_as<T>(self) -> Result<T, Self>
+    where
+        Self: TryInto<T, Error = Self>,
+    {
+        self.try_into()
+    }
+}
 
- #[derive(macros::From,
-         macros::TryInto,
-         macros::TryAsRef,
-         macros::TryAsMut,
-         macros::TypedContainer)]
- enum Value {
-     Int(i64),
-     Bool(bool),
-     String(String)
- }
- ```
+impl<U> TryAs for U {}
 
- ## `From`
-
- The macro `From` implements [`From`] (and as a result also [`Into`]) for all types enumerated by the
- enum. This allows to convert from values with specific types to `Value` trivially:
-
- ```rust
- let v = Value::from(-12);
- let v2 =  false.into();
- ```
-
- ## `TryInto`
-
- Converting _away_ from `Value` to a concrete type might fail, since the `Value` might not be holding the required type.
- The macro `TryInto` this implements the trait [`TryInto`] to convert `Value` back to a concrete type:
- ```rust
- let v = Value::Int(0);
- let int: Result<i64, Value> = v.clone().try_into();
- let bool: Result<bool, Value> = v.try_into();
-
- assert_eq!(int.unwrap(), 0);
- assert!(bool.is_err());
- ```
-
- If the conversion fails, we get the original value back.
-
- If we _know_ that the contained value is of a certain type `T`,
- we can use `UnwrapInto<T>`, which is implemented for all types `TryInto<T>`,
- and panics if the value isn't as expected:
-
- ```rust
- let v = Value::Int(8);
- let int: i64 = v.clone().unwrap_into();
- // This will panic:
- let bool: bool = v.unwrap_into();
- ```
-
- ## `TryAsRef` and `TryAsMut`
- `try_into` and `unwrap_into` both take ownership of the value. To only get a reference, we can use [`TryAsRef`] and [`TryAsMut`]:
- ```rust
- let mut v = Value::Int(8);
-
- let int: &mut i64 = v.try_as_mut().unwrap();
- *int += 1;
-
-
- let int: &i64 = v.try_as_ref().unwrap();
- println!("v is {}", int);
-
- let foo: Option<&bool> = v.try_as_ref();
- assert!(foo.is_none());
- ```
-
- Same as before, if we are _certain_ that a `Value` is of a specific type, we can use the blanket implementations
- of [`UnwrapAsRef`] and [`UnwrapAsMut`]:
-
- ```rust
- let mut v = Value::Int(8);
- *v.unwrap_as_mut() += 22;
- ```
-
- ## `TypedContainer`
- If we don't know type a `Value` contains, we could pattern match on the `Value` itself,
- check with `is_err()` using `TryAsRef`, or, we can use the [`TypedContainer`] implementation,
- to get access to the [`std::any::TypeId`] of the contained value:
-
- ```rust
- use std::any::TypeId;
-
- let v = Value::Int(8);
-
- assert!(TypeId::of::<i64>() == v.type_id());
- assert!(v.is<i64>());
- ```
- Check the [`std::any`] crate for more infos.
+// Now, if `x` is implemented for TryInto<u64>, we can write
+let maybe_x = x.try_as::<i64>();
+// Or to unwrap
+let val = x.try_as::<i64>().unwrap();
+```
