@@ -42,14 +42,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tests"
-version = "0.1.0"
-dependencies = [
- "macros",
- "traits",
-]
-
-[[package]]
 name = "traits"
 version = "0.1.0"
 
