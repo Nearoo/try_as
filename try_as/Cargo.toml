@@ -1,0 +1,16 @@
+[package]
+name = "try_as"
+version = "0.1.0"
+license-file = "../LICENSE.txt"
+keywords = ["macro", "utiliy", "derive", "type", "types", "enum"]
+exclude=["docs/", "Makefile"]
+description = "Macros and traits to ease using enums whose sole purpose is to enumerate a set of types."
+homepage = "https://github.com/Nearoo/try_as"
+documentation = "https://nearoo.github.io/try_as/try_as/"
+repository = "https://github.com/Nearoo/try_as"
+readme = "README.md"
+
+
+[dependencies]
+try_as_traits = { path="../traits", version="0.1.0" }
+try_as_macros = { path="../macros", version="0.1.0" }

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"derive":[["From","Derive [`From<T>`] implementations for a type enumerating enum."],["TryAsMut","Derive trait [`TryAsMut`] for a type enumerating enum."],["TryAsRef","Derive trait [`TryAsRef`] for a type enumerating enum."],["TryInto","Derive [`TryInto<T>`] for a type enumerating enum."],["TypedContainer","Derive [`traits::TypedContainer`] for a type enumerating enum."]],"mod":[["traits","Contains the traits `TryAsRef`, `TryAsMut` and `TypedContainer`"]]};
+window.SIDEBAR_ITEMS = {"externcrate":[["macros",""],["traits",""]]};

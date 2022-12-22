@@ -1,3 +1,8 @@
+//! A set of macros to ease using enums whose sole purpose is to enumerate a set of types, used by the crate [try_as](https://crates.io/crates/try_as).
+//!
+//! See the the [crate documentation](https://nearoo.github.io/try_as/try_as/) for more information
+//! and documentation on how to use the macros.
+
 extern crate proc_macro;
 use core::panic;
 use std::collections::HashSet;
@@ -44,7 +49,7 @@ pub fn derive_try_as_mut(input: TokenStream) -> TokenStream {
     gen_try_as_mut(&enum_data)
 }
 
-/// Derive [`traits::TypedContainer`] for a type enumerating enum.
+/// Derive [`TypedContainer`] for a type enumerating enum.
 #[proc_macro_derive(TypedContainer)]
 pub fn derive_typed_value(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -138,7 +143,7 @@ fn gen_try_as_ref(enum_data: &EnumData) -> TokenStream {
 
     let impls = variants.iter().map(|(ident, type_)| {
         quote! {
-            impl traits::TryAsRef<#type_> for #enum_ident {
+            impl try_as_traits::TryAsRef<#type_> for #enum_ident {
                 fn try_as_ref(&self) -> Option<&#type_>{
                     if let Self::#ident(a) = self {
                         Some(a)
@@ -158,7 +163,7 @@ fn gen_try_as_mut(enum_data: &EnumData) -> TokenStream {
 
     let impls = variants.iter().map(|(ident, type_)| {
         quote! {
-            impl traits::TryAsMut<#type_> for #enum_ident {
+            impl TryAsMut<#type_> for #enum_ident {
                 fn try_as_mut(&mut self) -> Option<&mut #type_>{
                     if let Self::#ident(a) = self {
                         Some(a)
@@ -183,7 +188,7 @@ fn gen_typed_value(enum_data: &EnumData) -> TokenStream {
     });
 
     TokenStream::from(quote! {
-        impl traits::TypedContainer for #enum_ident {
+        impl TypedContainer for #enum_ident {
             fn type_id(&self) -> std::any::TypeId {
                 match self {
                     #(#type_id_match_arms),*

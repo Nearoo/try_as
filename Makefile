@@ -1,6 +1,6 @@
 .PHONY: docs
 
-docs:
+doc:
 	cargo doc
 	rm -rf docs/*
 	mkdir -p docs

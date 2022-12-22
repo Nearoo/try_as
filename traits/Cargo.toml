@@ -1,8 +1,12 @@
 [package]
-name = "traits"
+name = "try_as_traits"
 version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
+edition = "2021" 
+license-file = "../LICENSE.txt"
+keywords = ["macro", "utiliy", "derive", "type", "types", "enum"]
+exclude=["docs/", "Makefile"]
+description = "Traits to ease using enums whose sole purpose is to enumerate a set of types."
+homepage = "https://github.com/Nearoo/try_as"
+documentation = "https://nearoo.github.io/try_as/try_as_traits/"
+repository = "https://github.com/Nearoo/try_as"
+readme = "README.md"

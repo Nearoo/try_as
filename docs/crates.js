@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["macros","proc_macro2","quote","syn","tests","traits","try_as","unicode_ident"];
+window.ALL_CRATES = ["macros","proc_macro2","quote","syn","tests","traits","try_as","try_as_macros","try_as_traits","unicode_ident"];

@@ -18,6 +18,10 @@
 //! * Each variant must have exactly one unnamed parameter
 //! * Each variant argument type must appear at most once
 //!
+//! See also:
+//! * crate [`macros`] (re-export of [`try_as_macros`])
+//! * crate [`traits`] (re-export of [`try_as_traits`])
+//!
 //! ## Example
 //!
 //! Assume we have an enum that enumerates values of `i64`, `String` and `bool`:
@@ -33,10 +37,14 @@
 //! This crate exposes the following macros to ease this conversion:
 //!
 //! ```rust
-//! # extern crate macros;
-//! # use macros as try_as;
+//! # mod try_as {
+//! #   pub extern crate try_as_macros as macros;
+//! #   pub extern crate try_as_traits as traits;
+//! # }
 //! # use std::convert::TryInto;
-//! #[derive(try_as::From, try_as::TryInto, Debug)]
+//! use try_as::macros;
+//!
+//! #[derive(macros::From, macros::TryInto, Debug)]
 //! enum Value{
 //!     Number(i64),
 //!     String(String),
@@ -61,13 +69,15 @@
 //!
 //! ```rust
 //! # mod try_as {
-//! #    pub extern crate traits;
-//! #    extern crate macros;
-//! #    pub use self::macros::*;
+//! #   pub extern crate try_as_macros as macros;
+//! #   pub extern crate try_as_traits as traits;
 //! # }
-//! use try_as::traits::{TryAsRef, TryAsMut};
+//! use try_as::{
+//!     traits::{TryAsRef, TryAsMut},
+//!     macros,
+//! };
 //!
-//! #[derive(try_as::TryAsRef, try_as::TryAsMut)]
+//! #[derive(macros::TryAsRef, macros::TryAsMut)]
 //! enum Value{
 //!     Number(i64),
 //!     String(String),
@@ -93,13 +103,15 @@
 //! us to look at the [`std::any::TypeId`] of the contained type:
 //! ```
 //! # mod try_as {
-//! #    pub extern crate traits;
-//! #    extern crate macros;
-//! #    pub use self::macros::*;
+//! #   pub extern crate try_as_macros as macros;
+//! #   pub extern crate try_as_traits as traits;
 //! # }
-//! use try_as::traits::TypedContainer;
+//! use try_as::{
+//!     traits::TypedContainer,
+//!     macros
+//! };
 //!
-//! #[derive(try_as::TypedContainer)]
+//! #[derive(macros::TypedContainer)]
 //! enum Value{
 //!     Number(i64),
 //!     String(String),
@@ -114,11 +126,5 @@
 //!
 //! ```
 
-extern crate macros;
-pub use macros::*;
-
-/// Contains the traits `TryAsRef`, `TryAsMut` and `TypedContainer`
-pub mod traits {
-    extern crate traits;
-    pub use self::traits::*;
-}
+pub extern crate try_as_macros as macros;
+pub extern crate try_as_traits as traits;

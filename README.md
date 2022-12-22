@@ -18,6 +18,9 @@ To derive the traits for an enum, the enum has to have the following shape:
 * Each variant must have exactly one unnamed parameter
 * Each variant argument type must appear at most once
 
+## Documentation
+
+The documentation can be read [here](https://nearoo.github.io/try_as/try_as/).
 
 ## Example
 
@@ -51,7 +54,15 @@ assert_eq!(maybe_i64.unwrap(), 0);
 
 Read more in the [documentation](https://nearoo.github.io/try_as/).
 
+
+
+
+
 ## Todos and notes
+
+The API isn't necessairly stable yet. Suggestions for improvements and PR's welcome!
+
+---
 
 Some traits in some situations are verbose to use, e.g:
 
