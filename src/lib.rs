@@ -122,21 +122,3 @@ pub mod traits {
     extern crate traits;
     pub use self::traits::*;
 }
-
-#[cfg(test)]
-mod test {
-    use traits::TryAsMut;
-
-    use super::*;
-    #[test]
-    fn test() {
-        #[derive(TryAsMut)]
-        enum Foo {
-            I32(i32),
-        }
-
-        let mut f = Foo::I32(0);
-        let x = f.try_as_mut_of::<i32>().unwrap();
-        *x = 2;
-    }
-}
