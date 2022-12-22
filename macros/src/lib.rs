@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use proc_macro::TokenStream;
 
 use quote::quote;
-use syn::{parse_macro_input, token::Enum, Data, DeriveInput, Fields, Ident, Type};
+use syn::{parse_macro_input, Data, DeriveInput, Fields, Ident, Type};
 
 /// Contains all data of an enum we need:
 /// It's identifier, and a vector of variants, each with
