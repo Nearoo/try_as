@@ -143,7 +143,7 @@ fn gen_try_as_ref(enum_data: &EnumData) -> TokenStream {
 
     let impls = variants.iter().map(|(ident, type_)| {
         quote! {
-            impl try_as_traits::TryAsRef<#type_> for #enum_ident {
+            impl ::try_as::traits::TryAsRef<#type_> for #enum_ident {
                 fn try_as_ref(&self) -> Option<&#type_>{
                     if let Self::#ident(a) = self {
                         Some(a)
@@ -163,7 +163,7 @@ fn gen_try_as_mut(enum_data: &EnumData) -> TokenStream {
 
     let impls = variants.iter().map(|(ident, type_)| {
         quote! {
-            impl TryAsMut<#type_> for #enum_ident {
+            impl ::try_as::traits::TryAsMut<#type_> for #enum_ident {
                 fn try_as_mut(&mut self) -> Option<&mut #type_>{
                     if let Self::#ident(a) = self {
                         Some(a)
@@ -188,7 +188,7 @@ fn gen_typed_value(enum_data: &EnumData) -> TokenStream {
     });
 
     TokenStream::from(quote! {
-        impl TypedContainer for #enum_ident {
+        impl ::try_as::traits::TypedContainer for #enum_ident {
             fn type_id(&self) -> std::any::TypeId {
                 match self {
                     #(#type_id_match_arms),*
