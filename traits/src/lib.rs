@@ -25,3 +25,16 @@ pub trait TypedContainer {
     /// Returns the [`std::any::TypeId`] of the contained value.
     fn type_id(&self) -> TypeId;
 }
+
+// ------------------------- Blanket Implementations ------------------------- //
+impl<T> TryAsRef<T> for T {
+    fn try_as_ref(&self) -> Option<&T> {
+        Some(self)
+    }
+}
+
+impl<T> TryAsMut<T> for T {
+    fn try_as_mut(&mut self) -> Option<&mut T> {
+        Some(self)
+    }
+}
